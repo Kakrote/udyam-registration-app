@@ -1,0 +1,15 @@
+{
+  "preset": "next/jest",
+  "setupFilesAfterEnv": ["<rootDir>/tests/setup.ts"],
+  "testEnvironment": "jsdom",
+  "testMatch": ["**/__tests__/**/*.test.tsx", "**/*.test.tsx"],
+  "moduleNameMapping": {
+    "^@/(.*)$": "<rootDir>/src/$1"
+  },
+  "collectCoverageFrom": [
+    "src/**/*.{ts,tsx}",
+    "!src/**/*.d.ts",
+    "!src/pages/_app.tsx",
+    "!src/pages/_document.tsx"
+  ]
+}
