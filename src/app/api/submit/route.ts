@@ -1,37 +1,25 @@
 // Form submission endpoint
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { prisma } from '@/lib/db';
 
 // Validation schema (same as your backend)
 const udyamSchema = z.object({
   // Basic Information
-  enterpriseName: z.string().min(1, 'Enterprise name is required'),
-  majorActivity: z.string().min(1, 'Major activity is required'),
-  
-  // Organization Details
-  organizationType: z.enum(['PROPRIETARY', 'PARTNERSHIP', 'COMPANY', 'COOPERATIVE']),
-  dateOfIncorporation: z.string(),
-  
-  // Contact Information
+  aadhaarNumber: z.string().min(12, 'Aadhaar number must be 12 digits').max(12),
+  applicantName: z.string().min(1, 'Applicant name is required'),
+  panNumber: z.string().optional(),
   mobileNumber: z.string().regex(/^[6-9]\d{9}$/, 'Invalid mobile number'),
-  emailId: z.string().email('Invalid email address'),
-  
-  // Address
-  address: z.string().min(1, 'Address is required'),
-  pinCode: z.string().regex(/^\d{6}$/, 'Invalid PIN code'),
-  district: z.string().min(1, 'District is required'),
-  state: z.string().min(1, 'State is required'),
+  emailAddress: z.string().email('Invalid email address'),
   
   // Business Details
-  numberOfEmployees: z.number().min(0),
-  investmentInPlantMachinery: z.number().min(0),
-  turnoverAmount: z.number().min(0),
-  
-  // Bank Details (optional)
-  bankName: z.string().optional(),
-  branchName: z.string().optional(),
-  accountNumber: z.string().optional(),
-  ifscCode: z.string().optional(),
+  businessName: z.string().min(1, 'Business name is required'),
+  businessType: z.string().min(1, 'Business type is required'),
+  businessAddress: z.string().min(1, 'Business address is required'),
+  pincode: z.string().regex(/^\d{6}$/, 'Invalid PIN code'),
+  state: z.string().min(1, 'State is required'),
+  district: z.string().min(1, 'District is required'),
+  city: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -41,22 +29,29 @@ export async function POST(request: NextRequest) {
     // Validate input
     const validatedData = udyamSchema.parse(body);
     
-    // For now, just log the data (you can add database logic later)
-    console.log('Form submitted:', validatedData);
-    
-    // TODO: Save to database
-    // const submission = await prisma.udyamSubmission.create({
-    //   data: {
-    //     ...validatedData,
-    //     submittedAt: new Date(),
-    //     status: 'PENDING'
-    //   }
-    // });
+    // Save to database
+    const submission = await prisma.udyamRegistration.create({
+      data: {
+        aadhaarNumber: validatedData.aadhaarNumber,
+        applicantName: validatedData.applicantName,
+        panNumber: validatedData.panNumber || null,
+        mobileNumber: validatedData.mobileNumber,
+        emailAddress: validatedData.emailAddress,
+        businessName: validatedData.businessName,
+        businessType: validatedData.businessType,
+        businessAddress: validatedData.businessAddress,
+        pincode: validatedData.pincode,
+        state: validatedData.state,
+        district: validatedData.district,
+        city: validatedData.city || null,
+        status: 'PENDING'
+      }
+    });
     
     return NextResponse.json({
       success: true,
       message: 'Form submitted successfully',
-      submissionId: `UDY-${Date.now()}`
+      submissionId: submission.id
     });
     
   } catch (error) {

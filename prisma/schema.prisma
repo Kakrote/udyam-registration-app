@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UdyamRegistration {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Step 1 - Basic Information
+  aadhaarNumber    String  @map("aadhaar_number") @db.VarChar(12)
+  applicantName    String  @map("applicant_name") @db.VarChar(100)
+  panNumber        String? @map("pan_number") @db.VarChar(10)
+  mobileNumber     String  @map("mobile_number") @db.VarChar(10)
+  emailAddress     String  @map("email_address") @db.VarChar(255)
+  
+  // Step 2 - Business Details
+  businessName     String  @map("business_name") @db.VarChar(200)
+  businessType     String  @map("business_type") @db.VarChar(50)
+  businessAddress  String  @map("business_address") @db.Text
+  pincode          String  @db.VarChar(6)
+  state            String  @db.VarChar(100)
+  district         String  @db.VarChar(100)
+  city             String? @db.VarChar(100)
+  
+  // Additional fields
+  gstinNumber      String? @map("gstin_number") @db.VarChar(15)
+  bankAccountNumber String? @map("bank_account_number") @db.VarChar(20)
+  ifscCode         String? @map("ifsc_code") @db.VarChar(11)
+  
+  // Metadata
+  formVersion      String  @default("1.0") @map("form_version")
+  submissionStep   Int     @default(1) @map("submission_step")
+  isCompleted      Boolean @default(false) @map("is_completed")
+  
+  // Audit fields
+  ipAddress        String? @map("ip_address")
+  userAgent        String? @map("user_agent")
+
+  @@map("udyam_registrations")
+  @@index([aadhaarNumber])
+  @@index([panNumber])
+  @@index([createdAt])
+}
+
+model FormSubmissionLog {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  
+  // Request details
+  endpoint     String   @db.VarChar(100)
+  method       String   @db.VarChar(10)
+  statusCode   Int
+  responseTime Int      // in milliseconds
+  
+  // Client details
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  
+  // Request data (JSON)
+  requestData  Json?    @map("request_data")
+  errorMessage String?  @map("error_message") @db.Text
+  
+  @@map("form_submission_logs")
+  @@index([createdAt])
+  @@index([endpoint])
+}
+
+model PostalCode {
+  id       String @id @default(cuid())
+  pincode  String @unique @db.VarChar(6)
+  city     String @db.VarChar(100)
+  district String @db.VarChar(100)
+  state    String @db.VarChar(100)
+  
+  @@map("postal_codes")
+  @@index([pincode])
+}
