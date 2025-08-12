@@ -1,0 +1,14 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "npm start",
+    "healthcheckPath": "/api/health"
+  },
+  "variables": {
+    "NODE_ENV": "production",
+    "PORT": "5000"
+  }
+}
