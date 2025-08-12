@@ -8,9 +8,23 @@ interface FormSchema {
   steps: Array<{
     stepNumber: number;
     title: string;
-    fields: any[];
+    fields: FormField[];
   }>;
-  validationRules: Record<string, any>;
+  validationRules: Record<string, ValidationRule>;
+}
+
+interface FormField {
+  id: string;
+  type: string;
+  label: string;
+  required?: boolean;
+  options?: string[];
+}
+
+interface ValidationRule {
+  required?: boolean;
+  pattern?: string;
+  message?: string;
 }
 
 interface FormData {
